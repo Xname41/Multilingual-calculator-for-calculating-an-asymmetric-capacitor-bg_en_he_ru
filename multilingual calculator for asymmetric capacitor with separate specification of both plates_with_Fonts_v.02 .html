@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="bg"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<title>Калкулатор за асиметричен кондензатор</title>
+<style>
+@font-face { font-family: "MyLocalFont"; src: url("https://raw.githubusercontent.com/Xname41/Multilingual-calculator-for-calculating-an-asymmetric-capacitor-bg_en_he_ru/main/Vida41Pro 02.ttf") format("truetype"); }
+@font-face { font-family: "MyNumericFont"; src: url("https://raw.githubusercontent.com/Xname41/Multilingual-calculator-for-calculating-an-asymmetric-capacitor-bg_en_he_ru/main/HP-15C_Simulator_Font.ttf") format("truetype"); }
+
+html, body { margin:0; padding:0; height:100%; width:100%; font-family:"MyLocalFont", sans-serif; }
+body { display:flex; justify-content:center; align-items:flex-start; padding:20px; box-sizing:border-box; background-color:#f0f0f0; }
+
+#calculator { max-width:1200px; width:100%; transform-origin:top center; }
+
+input[type="number"] { font-family:"MyNumericFont", monospace; font-size:15px; width:100%; box-sizing:border-box; padding:6px; }
+select, button { font-family:"MyLocalFont", sans-serif; font-size:15px; width:100%; box-sizing:border-box; padding:6px; }
+button { margin-top:10px; }
+
+#btnCalcMesh, #btnCalcCap {
+    background-color: #007BFF; color: #FFFFFF; border: none; cursor: pointer;
+}
+#btnCalcMesh:hover, #btnCalcCap:hover {
+    background-color: #0056b3;
+}
+
+h2 { margin-top:30px; }
+.row { display:grid; grid-template-columns: 300px 1fr; gap:10px; margin:6px 0; }
+
+#result1, #result2 { margin-top:16px; font-weight:50; }
+.result-text { font-family:"MyLocalFont"; }
+.result-number { font-family:"MyNumericFont"; }
+
+@media(max-width:600px){ .row{grid-template-columns:1fr;} }
+#languageRow { display:flex; align-items:center; margin-bottom:20px; gap:10px; }
+</style>
+
+</head>
+<body>
+
+
+<div id="calculator" style="transform: scale(1);">
+
+<div id="languageRow">
+    <label for="langSelect" id="langLabel">Език:</label>
+    <select id="langSelect">
+        <option value="bg" selected="selected">Български</option>
+        <option value="en">English</option>
+        <option value="he">עברית</option>
+        <option value="ru">Русский</option>
+    </select>
+</div>
+
+<h2 id="title1">1. Ефективна площ на електродната мрежа</h2>
+<div class="row">
+  <label id="lblLMesh">Дължина на мрежовия електрод L (мм):</label>
+  <input type="number" id="L_mesh" value="100" step="0.1">
+</div>
+<div class="row">
+  <label id="lblWMesh">Ширина на мрежовия електрод W (мм):</label>
+  <input type="number" id="W_mesh" value="100" step="0.1">
+</div>
+<div class="row">
+  <label id="lblLElectrode">Дължина на целия електрод L (мм):</label>
+  <input type="number" id="L_total" value="100" step="0.1">
+</div>
+<div class="row">
+  <label id="lblWElectrode">Ширина на целия електрод W (мм):</label>
+  <input type="number" id="W_total" value="100" step="0.1">
+</div>
+<div class="row">
+  <label id="lblDHole">Диаметър на отвора или страна на квадрат d (мм):</label>
+  <input type="number" id="d_hole" value="1" step="0.01">
+</div>
+<div class="row">
+  <label id="lblSWire">Ширина на проводника между отворите s (мм):</label>
+  <input type="number" id="s_wire" value="0.3" step="0.01">
+</div>
+<div class="row">
+  <label id="lblShape">Форма на отвора:</label>
+  <select id="shape"><option value="circle" selected="selected">Кръг</option><option value="square">Квадрат</option><option value="hexagon">Шестоъгълник</option></select>
+</div>
+<button onclick="calcMesh()" id="btnCalcMesh">Изчисли ефективна площ</button>
+<div id="result1">Ефективна площ на мрежата: <span class="result-number">5352.67</span> мм²</div>
+
+<hr>
+
+<h2 id="title2">2. Капацитет на асиметричен кондензатор</h2>
+<div class="row">
+  <label id="lblLDie">Дължина на диелектрика L (мм):</label>
+  <input type="number" id="L_die" value="100" step="0.1">
+</div>
+<div class="row">
+  <label id="lblWDie">Ширина на диелектрика W (мм):</label>
+  <input type="number" id="W_die" value="100" step="0.1">
+</div>
+<div class="row">
+  <label id="lblDDie">Дебелина на диелектрика d (мм):</label>
+  <input type="number" id="d_die" value="2" step="0.01">
+</div>
+<div class="row">
+  <label id="lblMaterial">Материал на диелектрика [εr]:</label>
+  <input type="number" id="material" value="4.5" step="0.01" list="materialList">
+  <datalist id="materialList">
+    <option value="4.5">Кварц [εr≈4.5]</option>
+    <option value="5.0">Стъкло [εr≈5]</option>
+    <option value="6.0">Керамика [εr≈6]</option>
+    <option value="3.0">Пластмаса [PVC, εr≈3]</option>
+    <option value="6.0">Фаянс [εr≈6]</option>
+    <option value="6.0">Порцелен [εr≈6]</option>
+    <option value="5.0">Гетинакс [εr≈5]</option>
+  </datalist>
+</div>
+
+<div class="row">
+  <label id="lblAEff">Ефективна площ на електродната мрежа (мм²):</label>
+  <input type="number" id="A_eff" value="5463.54" step="0.01">
+</div>
+<button onclick="calcCap()" id="btnCalcCap">Изчисли капацитет</button>
+<div id="result2">Невалидни параметри.</div>
+
+</div>
+
+<script>
+let currentLang = 'bg';
+
+const texts = {
+  bg: {
+    langLabel:"Език:", title1:"1. Ефективна площ на електродната мрежа", title2:"2. Капацитет на асиметричен кондензатор",
+    lblLMesh:"Дължина на мрежовия електрод L (мм):", lblWMesh:"Ширина на мрежовия електрод W (мм):",
+    lblLElectrode:"Дължина на целия електрод L (мм):", lblWElectrode:"Ширина на целия електрод W (мм):",
+    lblDHole:"Диаметър на отвора или страна на квадрат d (мм):", lblSWire:"Ширина на проводника между отворите s (мм):",
+    lblShape:"Форма на отвора:", btnCalcMesh:"Изчисли ефективна площ",
+    lblLDie:"Дължина на диелектрика L (мм):", lblWDie:"Ширина на диелектрика W (мм):", lblDDie:"Дебелина на диелектрика d (мм):",
+    lblMaterial:"Материал на диелектрика [εr]:", lblAEff:"Ефективна площ на електродната мрежа (мм²):", btnCalcCap:"Изчисли капацитет",
+    shapeOptions:{circle:"Кръг", square:"Квадрат", hexagon:"Шестоъгълник"},
+    materialOptions:[
+      {value:"4.5", label:"Кварц [εr≈4.5]"},
+      {value:"5.0", label:"Стъкло [εr≈5]"},
+      {value:"6.0", label:"Керамика [εr≈6]"},
+      {value:"3.0", label:"Пластмаса [PVC, εr≈3]"},
+      {value:"6.0", label:"Фаянс [εr≈6]"},
+      {value:"6.0", label:"Порцелен [εr≈6]"},
+      {value:"5.0", label:"Гетинакс [εr≈5]"}
+    ],
+    invalidParams:"Невалидни параметри.",
+    effectiveMeshLabel:"Ефективна площ на мрежата:",
+    capacitanceLabel:"Капацитет на асиметричния кондензатор",
+    unit_mm:" мм", unit_mm2:" мм²", unit_pf:" pF"
+  },
+  en: {
+    langLabel:"Language:", title1:"1. Effective electrode mesh area", title2:"2. Asymmetric capacitor capacitance",
+    lblLMesh:"Mesh electrode length L (mm):", lblWMesh:"Mesh electrode width W (mm):",
+    lblLElectrode:"Total electrode length L (mm):", lblWElectrode:"Total electrode width W (mm):",
+    lblDHole:"Hole diameter or square side d (mm):", lblSWire:"Wire width between holes s (mm):",
+    lblShape:"Hole shape:", btnCalcMesh:"Calculate effective area",
+    lblLDie:"Dielectric length L (mm):", lblWDie:"Dielectric width W (mm):", lblDDie:"Dielectric thickness d (mm):",
+    lblMaterial:"Dielectric material [εr]:", lblAEff:"Effective electrode area (mm²):", btnCalcCap:"Calculate capacitance",
+    shapeOptions:{circle:"Circle", square:"Square", hexagon:"Hexagon"},
+    materialOptions:[
+      {value:"4.5", label:"Quartz [εr≈4.5]"},
+      {value:"5.0", label:"Glass [εr≈5]"},
+      {value:"6.0", label:"Ceramic [εr≈6]"},
+      {value:"3.0", label:"Plastic [PVC, εr≈3]"},
+      {value:"6.0", label:"Fayance [εr≈6])"},
+      {value:"6.0", label:"Porcelain [εr≈6]"},
+      {value:"5.0", label:"Getinax [εr≈5]"}
+    ],
+    invalidParams:"Invalid parameters.",
+    effectiveMeshLabel:"Effective mesh area:",
+    capacitanceLabel:"Capacitance of asymmetric capacitor",
+    unit_mm:" mm", unit_mm2:" mm²", unit_pf:" pF"
+  },
+  he: {
+    langLabel:"שפה:", title1:"1. שטח אפקטיבי של האלקטרודה המרושתת", title2:"2. קיבול של קבל א-סימטרי",
+    lblLMesh:"אורך האלקטרודה המרושתת L (מ\"מ):", lblWMesh:"רוחב האלקטרודה המרושתת W (מ\"מ):",
+    lblLElectrode:"אורך האלקטרודה הכולל L (מ\"מ):", lblWElectrode:"רוחב האלקטרודה הכולל W (מ\"מ):",
+    lblDHole:"קוטר החור או צלע הריבוע d (מ\"מ):", lblSWire:"רוחב החוט בין החורים s (מ\"מ):",
+    lblShape:"צורת החור:", btnCalcMesh:"חשב שטח אפקטיבי",
+    lblLDie:"אורך הדיאלקטריק L (מ\"מ):", lblWDie:"רוחב הדיאלקטריק W (מ\"מ):", lblDDie:"עובי הדיאלקטריק d (מ\"מ):",
+    lblMaterial:"חומר הדיאלקטריק [εr]:", lblAEff:"שטח אפקטיבי של האלקטרודה המרושתת (מ\"מ²):", btnCalcCap:"חשב קיבול",
+    shapeOptions:{circle:"עיגול", square:"מרובע", hexagon:"משושה"},
+    materialOptions:[
+      {value:"4.5", label:"קוורץ [εr≈4.5]"},
+      {value:"5.0", label:"זכוכית [εr≈5]"},
+      {value:"6.0", label:"קרמיקה [εr≈6]"},
+      {value:"3.0", label:"פלסטיק [PVC, εr≈3]"},
+      {value:"6.0", label:"חימר [εr≈6]"},
+      {value:"6.0", label:"פורצלן [εr≈6]"},
+      {value:"5.0", label:"גטינקס [εr≈5]"}
+    ],
+    invalidParams:"פרמטרים לא חוקיים.",
+    effectiveMeshLabel:"שטח אפקטיבי של הרשת:",
+    capacitanceLabel:"קיבול של הקבל הא-סימטרי",
+    unit_mm:" מ\"מ", unit_mm2:" מ\"מ²", unit_pf:" פיקו פרד"
+  },
+  ru: {
+    langLabel:"Язык:", title1:"1. Эффективная площадь сетчатого электрода", title2:"2. Ёмкость асимметричного конденсатора",
+    lblLMesh:"Длина сеточного электрода L (мм):", lblWMesh:"Ширина сеточного электрода W (мм):",
+    lblLElectrode:"Длина всего электрода L (мм):", lblWElectrode:"Ширина всего электрода W (мм):",
+    lblDHole:"Диаметр отверстия или сторона квадрата d (мм):", lblSWire:"Ширина проводника между отверстиями s (мм):",
+    lblShape:"Форма отверстия:", btnCalcMesh:"Вычислить эффективную площадь",
+    lblLDie:"Длина диэлектрика L (мм):", lblWDie:"Ширина диэлектрика W (мм):", lblDDie:"Толщина диэлектрика d (мм):",
+    lblMaterial:"Материал диэлектрика [εr]:", lblAEff:"Эффективная площадь электрода (мм²):", btnCalcCap:"Вычислить ёмкость",
+    shapeOptions:{circle:"Круг", square:"Квадрат", hexagon:"Шестиугольник"},
+    materialOptions:[
+      {value:"4.5", label:"Кварц [εr≈4.5]"},
+      {value:"5.0", label:"Стекло [εr≈5]"},
+      {value:"6.0", label:"Керамика [εr≈6]"},
+      {value:"3.0", label:"Пластик [PVC, εr≈3]"},
+      {value:"6.0", label:"Фаянс [εr≈6]"},
+      {value:"6.0", label:"Фарфор [εr≈6]"},
+      {value:"5.0", label:"Гетинакс [εr≈5]"}
+    ],
+    invalidParams:"Недопустимые параметры.",
+    effectiveMeshLabel:"Эффективная площадь сетки:",
+    capacitanceLabel:"Ёмкость асимметричного конденсатора",
+    unit_mm:" мм", unit_mm2:" мм²", unit_pf:" пФ"
+  }
+};
+
+function setLanguage(lang){
+  if(!texts[lang]) lang='bg';
+  currentLang = lang;
+  const t = texts[lang];
+
+  // Превод на етикети
+  document.getElementById("langLabel").textContent = t.langLabel;
+  document.getElementById("title1").textContent = t.title1;
+  document.getElementById("title2").textContent = t.title2;
+  document.getElementById("lblLMesh").textContent = t.lblLMesh;
+  document.getElementById("lblWMesh").textContent = t.lblWMesh;
+  document.getElementById("lblLElectrode").textContent = t.lblLElectrode;
+  document.getElementById("lblWElectrode").textContent = t.lblWElectrode;
+  document.getElementById("lblDHole").textContent = t.lblDHole;
+  document.getElementById("lblSWire").textContent = t.lblSWire;
+  document.getElementById("lblShape").textContent = t.lblShape;
+  document.getElementById("btnCalcMesh").textContent = t.btnCalcMesh;
+  document.getElementById("lblLDie").textContent = t.lblLDie;
+  document.getElementById("lblWDie").textContent = t.lblWDie;
+  document.getElementById("lblDDie").textContent = t.lblDDie;
+  document.getElementById("lblMaterial").textContent = t.lblMaterial;
+  document.getElementById("lblAEff").textContent = t.lblAEff;
+  document.getElementById("btnCalcCap").textContent = t.btnCalcCap;
+
+  document.body.dir = (lang==='he')?'rtl':'ltr';
+  document.documentElement.lang = lang;
+
+  // Запазване на предишни стойности
+  const prevShape = document.getElementById('shape').value;
+  const prevMat = document.getElementById('material').value;
+
+  // Попълване на падащо меню за форма
+  const shapeSel = document.getElementById('shape');
+  shapeSel.innerHTML = "";
+  for(const key in t.shapeOptions){
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = t.shapeOptions[key];
+    shapeSel.appendChild(opt);
+  }
+  if(prevShape && [...shapeSel.options].some(o=>o.value===prevShape)) shapeSel.value = prevShape;
+
+  // Попълване на datalist за материал (редактируем input)
+  const matInput = document.getElementById("material");
+  const matList = document.getElementById("materialList");
+  matList.innerHTML = "";
+  t.materialOptions.forEach(m=>{
+    const opt = document.createElement("option");
+    opt.value = m.value;        // числовата стойност за смятане
+    opt.textContent = m.label;  // текст на съответния език
+    matList.appendChild(opt);
+  });
+  // запазване на предишно избрано
+  if(prevMat){
+    const found = t.materialOptions.find(o=>o.value===prevMat);
+    if(found) matInput.value = found.value;
+  }
+}
+
+
+
+document.getElementById("langSelect").addEventListener("change", function(){
+  const lang=this.value;
+  try{ localStorage.setItem('calcLang', lang); }catch(e){}
+  setLanguage(lang);
+});
+
+window.addEventListener('load', function(){
+  let saved=null;
+  try{ saved=localStorage.getItem('calcLang'); }catch(e){ saved=null; }
+  if(saved && texts[saved]) document.getElementById('langSelect').value=saved;
+  setLanguage(document.getElementById('langSelect').value || 'bg');
+});
+
+// --- Функции за изчисление ---
+function calcMesh(){
+  const L_mesh=parseFloat(document.getElementById('L_mesh').value);
+  const W_mesh=parseFloat(document.getElementById('W_mesh').value);
+  const L_total=parseFloat(document.getElementById('L_total').value);
+  const W_total=parseFloat(document.getElementById('W_total').value);
+  const d=parseFloat(document.getElementById('d_hole').value);
+  const s=parseFloat(document.getElementById('s_wire').value);
+  const shape=document.getElementById('shape').value;
+
+  if(isNaN(L_mesh)||isNaN(W_mesh)||isNaN(L_total)||isNaN(W_total)||isNaN(d)||isNaN(s)){
+    document.getElementById('result1').textContent=texts[currentLang].invalidParams;
+    return;
+  }
+
+  const holes_per_row = W_mesh / (d + s);
+const holes_per_col = L_mesh / (d + s);
+const n_holes = holes_per_row * holes_per_col;
+
+let hole_area;
+if(shape === 'circle'){
+    hole_area = Math.PI * (d / 2) * (d / 2);
+} else if(shape === 'square'){
+    hole_area = d * d;
+} else if(shape === 'hexagon'){
+    hole_area = (3 * Math.sqrt(3) / 2) * (d / 2) * (d / 2);
+} else {
+    hole_area = 0;
+}
+
+const A_eff_raw = L_mesh * W_mesh - n_holes * hole_area;
+const A_eff = Math.max(0, Math.min(A_eff_raw, L_total * W_total));
+
+document.getElementById('result1').innerHTML =
+  `${texts[currentLang].effectiveMeshLabel} <span class="result-number">${A_eff.toFixed(2)}</span>${texts[currentLang].unit_mm2}`;
+document.getElementById('A_eff').value = A_eff.toFixed(2);
+
+}
+
+function calcCap(){
+  const t = texts[currentLang];
+
+    const L_die_mm = parseFloat(document.getElementById('L_die').value);
+    const W_die_mm = parseFloat(document.getElementById('W_die').value);
+    const d_die_mm = parseFloat(document.getElementById('d_die').value);
+    const er = parseFloat(document.getElementById('material').value);
+    const A_eff_mm2 = parseFloat(document.getElementById('A_eff').value);
+
+    if([L_die_mm,W_die_mm,d_die_mm,er].some(v=>isNaN(v)||v<=0)){
+    document.getElementById('result2').textContent = t.invalidParams;
+    return;
+}
+
+
+    const eps0 = 8.854e-12;
+    const area_m2 = Math.min(Math.max(A_eff_mm2, 0), L_die_mm*W_die_mm) * 1e-6;
+    const d_m = d_die_mm / 1000;
+
+    const C = eps0 * er * area_m2 / d_m;
+
+    document.getElementById('result2').innerHTML =
+      `${texts[currentLang].capacitanceLabel}
+ <span class="result-number">${(C*1e12).toFixed(2)}</span>
+ ${texts[currentLang].unit_pf}</span>`;
+}
+
+// Fullscreen функционалност
+document.addEventListener('keydown',function(e){
+    if(e.key==='F'||e.key==='f'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();}
+    else if(e.key==='Escape'){if(document.fullscreenElement)document.exitFullscreen();}
+});
+
+// Адаптация към прозореца
+function resizeCalculator(){
+    const calc=document.getElementById('calculator');
+    const w=window.innerWidth-40;
+    const h=window.innerHeight-40;
+    const scale=Math.min(w/calc.scrollWidth, h/calc.scrollHeight, 1);
+    calc.style.transform=`scale(${scale})`;
+}
+
+window.addEventListener('load',function(){
+    resizeCalculator();
+    const saved = localStorage.getItem('calcLang');
+    if(saved) document.getElementById('langSelect').value=saved;
+    setLanguage(document.getElementById('langSelect').value);
+    document.getElementById('result1').textContent="";
+    document.getElementById('result2').textContent="";
+});
+window.addEventListener('resize',resizeCalculator);
+</script>
