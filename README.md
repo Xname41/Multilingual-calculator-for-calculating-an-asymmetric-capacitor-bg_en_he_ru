@@ -1,5 +1,5 @@
 This script is a multilingual calculator for calculating an asymmetrical capacitor. When results are displayed in the corresponding language and when the language is subsequently changed, the results remain in the previously selected language without being updated, for this purpose you must press the two result display buttons again to display the results in the corresponding updated selected language, in addition, there is a full screen function with the F [Fulscreen] buttons and the Esc [Escape] button, as well as support for scaling the calculator. There is also a Windows application of this calculator in this directory, version 02 has the ability to edit the dielectric material. 
 
-Your browser may detect it as a virus, this is because the app is not signed and via a python script HTML file is converted to a Windows app, so calmly, the file is not a virus
+It is possible that your browser will detect the applications as a virus, this is because the applications are not signed, so don't worry, the applications are not a virus.
 
 link to the LC calculator: https://coil32.net/
